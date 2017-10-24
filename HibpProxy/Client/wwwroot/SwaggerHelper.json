@@ -1,0 +1,316 @@
+﻿{
+  "swagger": "2.0",
+  "info": {
+    "version": "v2",
+    "title": "Have I Been Powned (Troy Hunt) API",
+    "description": "Proxy to haveibeenpwned.com, that allows the list of pwned accounts (email addresses and usernames) to be quickly searched via a RESTful service. Read more on <a href='https://haveibeenpwned.com/About'>haveibeenpwned.com</a>",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International License",
+      "url": "https://creativecommons.org/licenses/by/4.0/"
+    }
+  },
+  "basePath": "/",
+  "paths": {
+    "/api/v2/breachedaccount/{account}": {
+      "get": {
+        "tags": [ "Breaches" ],
+        "summary": "Getting all breaches for an account",
+        "description": "The most common use of the API is to return a list of all breaches a particular account has been involved in. The API takes a single parameter which is the account to be searched for. The account is not case sensitive and will be trimmed of leading or trailing white spaces. The account should always be URL encoded.",
+        "operationId": "ApiV2BreachedaccountByAccountGet",
+        "consumes": [],
+        "produces": [ "text/plain", "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "path",
+            "description": "Valid email address",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "truncateResponse",
+            "in": "query",
+            "description": "If true, returns only the name of the breach.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "description": "If true, filters the result set to only breaches against the domain specified. It is possible that one site (and consequently domain), is compromised on multiple occasions.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "includeUnverified",
+            "in": "query",
+            "description": "If true, returns breaches that have been flagged as \"unverified\". By default, only verified breaches are returned web performing a search.",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok — everything worked and there's a string array of pwned sites for the account",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/BreacheResponse" }
+            }
+          },
+          "400": { "description": "Bad request — the account does not comply with an acceptable format (i.e. it's an empty string)" },
+          "403": { "description": "Forbidden — no user agent has been specified in the request" },
+          "404": { "description": "Not found — the account could not be found and has therefore not been pwned" },
+          "429": { "description": "Too many requests — the rate limit has been exceeded" }
+        }
+      }
+    },
+    "/api/v2/breaches": {
+      "get": {
+        "tags": [ "Breaches" ],
+        "summary": "Getting all breached sites in the system",
+        "description": "A \"breach\" is an instance of a system having been compromised by an attacker and the data disclosed. For example, Adobe was a breach, Gawker was a breach etc. It is possible to return the details of each of breach in the system which currently stands at 245 breaches.",
+        "operationId": "ApiV2BreachesGet",
+        "consumes": [],
+        "produces": [ "text/plain", "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "description": "Filters the result set to only breaches against the domain specified. It is possible that one site (and consequently domain), is compromised on multiple occasions.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok — everything worked and there's a string array of pwned sites for the account",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/BreacheResponse" }
+            }
+          },
+          "400": { "description": "Bad request — the account does not comply with an acceptable format (i.e. it's an empty string)" },
+          "403": { "description": "Forbidden — no user agent has been specified in the request" },
+          "404": { "description": "Not found — the account could not be found and has therefore not been pwned" },
+          "429": { "description": "Too many requests — the rate limit has been exceeded" }
+        }
+      }
+    },
+    "/api/v2/breach/{name}": {
+      "get": {
+        "tags": [ "Breaches" ],
+        "summary": "Getting a single breached site",
+        "description": "Sometimes just a single breach is required and this can be retrieved by the breach \"name\". This is the stable value which may or may not be the same as the breach \"title\" (which can change). See the breach model below for more info.",
+        "operationId": "ApiV2BreachByNameGet",
+        "consumes": [],
+        "produces": [ "text/plain", "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Breach \"name\"",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok — everything worked and there's a string array of pwned sites for the account",
+            "schema": { "$ref": "#/definitions/BreacheResponse" }
+          },
+          "400": { "description": "Bad request — the breach does not comply with an acceptable format (i.e. it's an empty string)" },
+          "403": { "description": "Forbidden — no user agent has been specified in the request" },
+          "404": { "description": "Not found — the breach could not be found and has therefore not been pwned" },
+          "429": { "description": "Too many requests — the rate limit has been exceeded" }
+        }
+      }
+    },
+    "/api/v2/dataclasses": {
+      "get": {
+        "tags": [ "Breaches" ],
+        "summary": "Getting all data classes in the system",
+        "description": "A \"data class\" is an attribute of a record compromised in a breach. For example, many breaches expose data classes such as \"Email addresses\" and \"Passwords\". The values returned by this service are ordered alphabetically in a string array and will expand over time as new breaches expose previously unseen classes of data.",
+        "operationId": "ApiV2DataclassesGet",
+        "consumes": [],
+        "produces": [ "text/plain", "application/json", "text/json" ],
+        "responses": {
+          "200": {
+            "description": "Ok — return list of Data Class",
+            "schema": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "429": { "description": "Too many requests — the rate limit has been exceeded" }
+        }
+      }
+    },
+    "/api/v2/pwnedpassword/{password}": {
+      "get": {
+        "tags": [ "Passwords" ],
+        "summary": "Pwned Passwords",
+        "description": "Pwned Passwords are hundreds of millions of passwords which have previously been exposed in data breaches. The service is detailed in the blog post titled Introducing 306 Million Freely Downloadable Pwned Passwords where two models are described. The first is a downloadable the list of passwords which can be obtained via the Pwned Passwords page then integrated directly into third party systems. The second is to query HIBP directly either via the aforementioned page or the API documented here.",
+        "operationId": "ApiV2PwnedpasswordByPasswordGet",
+        "consumes": [],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "password",
+            "in": "path",
+            "description": "Password",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "originalPasswordIsAHash",
+            "in": "query",
+            "description": "Searches for a password which was originally a SHA1 hash, causing it to be hashed again before being compared to the Pwned Password repository.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Ok — the password was found in the Pwned Passwords repository" },
+          "404": { "description": "Not found — the password was not found in the Pwned Passwords repository" }
+        }
+      }
+    },
+    "/api/v2/pasteaccount/{account}": {
+      "get": {
+        "tags": [ "Paste" ],
+        "summary": "Getting all pastes for an account",
+        "description": "The API takes a single parameter which is the email address to be searched for. Unlike searching for breaches, usernames that are not email addresses cannot be searched for. The email is not case sensitive and will be trimmed of leading or trailing white spaces. The email should always be URL encoded.",
+        "operationId": "ApiV2PasteaccountByAccountGet",
+        "consumes": [],
+        "produces": [ "text/plain", "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "path",
+            "description": "Valid email address",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok — everything worked and there's a string array of pwned sites for the account",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/PasteResponse" }
+            }
+          },
+          "400": { "description": "Bad request — the account does not comply with an acceptable format (i.e. it's an empty string)" },
+          "403": { "description": "Forbidden — no user agent has been specified in the request" },
+          "404": { "description": "Not found — the account could not be found and has therefore not been pwned" },
+          "429": { "description": "Too many requests — the rate limit has been exceeded" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "BreacheResponse": {
+      "description": "Acount response",
+      "type": "object",
+      "properties": {
+        "title": {
+          "description": "A descriptive title for the breach suitable for displaying to end users. It's unique across all breaches but individual values may change in the future (i.e. if another breach occurs against an organisation already in the system). If a stable value is required to reference the breach, refer to the \"Name\" attribute instead.",
+          "type": "string"
+        },
+        "name": {
+          "description": "A Pascal-cased name representing the breach which is unique across all other breaches. This value never changes and may be used to name dependent assets (such as images) but should not be shown directly to end users (see the \"Title\" attribute instead).",
+          "type": "string"
+        },
+        "domain": {
+          "description": "The domain of the primary website the breach occurred on. This may be used for identifying other assets external systems may have for the site.",
+          "type": "string"
+        },
+        "breachDate": {
+          "description": "The date (with no time) the breach originally occurred on in ISO 8601 format. This is not always accurate — frequently breaches are discovered and reported long after the original incident. Use this attribute as a guide only.",
+          "type": "string"
+        },
+        "addedDate": {
+          "format": "date-time",
+          "description": "The date and time (precision to the minute) the breach was added to the system in ISO 8601 format.",
+          "type": "string"
+        },
+        "modifiedDate": {
+          "format": "date-time",
+          "description": "The date and time (precision to the minute) the breach was modified in ISO 8601 format. This will only differ from the AddedDate attribute if other attributes represented here are changed or data in the breach itself is changed (i.e. additional data is identified and loaded). It is always either equal to or greater then the AddedDate attribute, never less than.",
+          "type": "string"
+        },
+        "pwnCount": {
+          "format": "int32",
+          "description": "The total number of accounts loaded into the system. This is usually less than the total number reported by the media due to duplication or other data integrity issues in the source data.",
+          "type": "integer"
+        },
+        "description": {
+          "description": "Contains an overview of the breach represented in HTML markup. The description may include markup such as emphasis and strong tags as well as hyperlinks.",
+          "type": "string"
+        },
+        "dataClasses": {
+          "description": "This attribute describes the nature of the data compromised in the breach and contains an alphabetically ordered string array of impacted data classes.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "isVerified": {
+          "description": "Indicates that the breach is considered unverified. An unverified breach may not have been hacked from the indicated website. An unverified breach is still loaded into HIBP when there's sufficient confidence that a significant portion of the data is legitimate.",
+          "type": "boolean"
+        },
+        "isFabricated": {
+          "description": "Indicates that the breach is considered fabricated. A fabricated breach is unlikely to have been hacked from the indicated website and usually contains a large amount of manufactured data. However, it still contains legitimate email addresses and asserts that the account owners were compromised in the alleged breach.",
+          "type": "boolean"
+        },
+        "isSensitive": {
+          "description": "Indicates if the breach is considered sensitive. The public API will not return any accounts for a breach flagged as sensitive.",
+          "type": "boolean"
+        },
+        "isActive": {
+          "description": "Indicates if the breach is considered sensitive. The public API will not return any accounts for a breach flagged as sensitive.",
+          "type": "boolean"
+        },
+        "isRetired": {
+          "description": "no meta",
+          "type": "boolean"
+        },
+        "isSpamList": {
+          "description": "Indicates if the breach is considered a spam list. This flag has no impact on any other attributes but it means that the data has not come as a result of a security compromise.",
+          "type": "boolean"
+        },
+        "logoType": {
+          "description": "no meta",
+          "type": "string"
+        }
+      }
+    },
+    "PasteResponse": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "source": {
+          "description": "The paste service the record was retrieved from. Current values are: Pastebin, Pastie, Slexy, Ghostbin, QuickLeak, JustPaste, AdHocUrl, OptOut",
+          "type": "string"
+        },
+        "id": {
+          "description": "The ID of the paste as it was given at the source service. Combined with the \"Source\" attribute, this can be used to resolve the URL of the paste.",
+          "type": "string"
+        },
+        "title": {
+          "description": "The title of the paste as observed on the source site. This may be null and if so will be omitted from the response.",
+          "type": "string"
+        },
+        "date": {
+          "format": "date-time",
+          "description": "The date and time (precision to the second) that the paste was posted. This is taken directly from the paste site when this information is available but may be null if no date is published.",
+          "type": "string"
+        },
+        "emailCount": {
+          "format": "int32",
+          "description": "The number of emails that were found when processing the paste. Emails are extracted by using the regular expression \\b+(?!^.{256})[a-zA-Z0-9\\.\\-_\\+]+@[a-zA-Z0-9\\.\\-_]+\\.[a-zA-Z]+\\b",
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {}
+}
